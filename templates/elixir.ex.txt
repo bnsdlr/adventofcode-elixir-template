@@ -1,0 +1,16 @@
+defmodule %MODUELE% do
+  def part_one(_input) do
+    nil
+  end
+
+  def part_two(_input) do
+    nil
+  end
+
+  def tests do
+    [
+      [part: :part_one, result: nil, example: 1],
+      [part: :part_two, result: nil, example: 1],
+    ]
+  end
+end
