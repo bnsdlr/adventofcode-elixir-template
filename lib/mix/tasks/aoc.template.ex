@@ -53,7 +53,6 @@ defmodule Mix.Tasks.Aoc.Template do
       File.write!(example_file, "")
       IO.puts("Created example file: \e[1;34m#{example_file}\e[0m")
     end
-
   end
 
   def arg_config do

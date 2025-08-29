@@ -32,9 +32,7 @@ defmodule AOC.Path.Solution do
   end
 
   defp get_matching!(path, regex) do
-    for item <- File.ls!(path) do
-      if String.match?(item, regex), do: item
-    end
+    for item <- File.ls!(path), String.match?(item, regex), do: item
   end
 
   defp get_matching!(path, regex, fun) do

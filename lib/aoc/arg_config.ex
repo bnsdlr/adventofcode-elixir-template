@@ -12,7 +12,7 @@ defmodule AOC.ArgConfig do
     the value as an argument and return `:ok` if valid or `{:error, reason}` if invalid.
     Note: This function is not called on the default value
   - `required` - Boolean indicating whether this argument is required (`true`) or optional (`false`)
-  - `format_fn` - A function to format or transform the argument value
+  - `format_fn` - A function to format or transform the argument value, returns formated value.
 
   ## Example
 
