@@ -1,15 +1,14 @@
 defmodule Mix.Tasks.Aoc.Template do
   @moduledoc """
-    Create template files for the advent of code day.
+  Create template files for the advent of code day.
 
-    ## Examples
+  ## Examples
 
-      $ mix aoc.template --year=2025 --day=2
-      ...
-      Created elixir file: lib/bin/Y2025/D02.ex
-      Created input file: data/Y2025/D02/input.txt
-      Created example file: data/Y2025/D02/example-1.txt
-
+    $ mix aoc.template --year=2025 --day=2
+    ...
+    Created elixir file: lib/bin/Y2025/D02.ex
+    Created input file: data/Y2025/D02/input.txt
+    Created example file: data/Y2025/D02/example-1.txt
   """
 
   use Mix.Task
