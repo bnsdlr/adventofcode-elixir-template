@@ -3,13 +3,6 @@ defmodule AOC do
   Some utiliti functions.
   """
 
-  def time(task) do
-    started = Time.utc_now()
-    result = task.()
-    micros = Time.diff(Time.utc_now(), started, :microsecond)
-    {micros, result}
-  end
-
   @doc """
   Measures the time spend executing the `task`.
   """
