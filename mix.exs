@@ -7,7 +7,12 @@ defmodule AOC.MixProject do
       version: "0.1.0",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      env: [
+        elixir_template_file: "data/templates/elixir.ex.temp",
+        solutions_dir: "lib/bin",
+        puzzle_input_dir: "data",
+      ]
     ]
   end
 

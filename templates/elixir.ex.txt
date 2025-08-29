@@ -9,8 +9,8 @@ defmodule %MODUELE% do
 
   def tests do
     [
-      [part: :one, result: nil, example: 1],
-      [part: :two, result: nil, example: 1],
+      [part: :part_one, result: nil, example: 1],
+      [part: :part_two, result: nil, example: 1],
     ]
   end
 end

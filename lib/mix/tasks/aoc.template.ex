@@ -9,48 +9,63 @@ defmodule Mix.Tasks.Aoc.Template do
     Created elixir file: lib/bin/Y2025/D02.ex
     Created input file: data/Y2025/D02/input.txt
     Created example file: data/Y2025/D02/example-1.txt
-
   """
 
   use Mix.Task
 
-  require Logger
-
   @impl Mix.Task
   def run(args) do
-    args = AOC.parse_args(args)
+    %{"year" => year, "day" => day} =
+      AOC.Args.parse(args)
+      |> AOC.Args.apply_config!(arg_config())
 
-    case args do
-      %{"year" => year, "day" => day} ->
-        AOC.day_num_valid!(day)
-        AOC.year_num_valid!(year)
+    template =
+      AOC.Path.get(:template, [:elixir])
+      |> File.read!()
+      |> String.replace("%MODUELE%", AOC.Mod.str(year, day))
 
-        template =
-          AOC.elixir_template_file_path()
-          |> File.read!()
-          |> String.replace("%YEAR%", AOC.year_str(year))
-          |> String.replace("%DAY%", AOC.day_str(day))
+    elixir_file = AOC.Path.get(:solution, [year, day])
 
-        File.mkdir_p!(AOC.elixir_dir_path(year))
-        elixir_file = AOC.elixir_file_path(year, day)
-        File.write!(elixir_file, template)
-
-        IO.puts("Created elixir file: \e[1;34m#{elixir_file}\e[0m")
-
-        File.mkdir_p!(AOC.input_dir_path(year, day))
-        input_file = AOC.input_file_path(year, day)
-        File.write!(input_file, "")
-
-        IO.puts("Created input file: \e[1;34m#{input_file}\e[0m")
-
-        File.mkdir_p!(AOC.example_dir_path(year, day))
-        example_file = AOC.example_file_path(year, day, 1)
-        File.write!(example_file, "")
-
-        IO.puts("Created example file: \e[1;34m#{example_file}\e[0m")
-
-      _ ->
-        Logger.error("Make sure to provide year and day: --year=<year> --day=<day>")
+    if File.exists?(elixir_file) do
+      AOC.log_warn("Elixir file already exists, skiping.")
+    else
+      File.mkdir_p!(AOC.Path.get(:solution, [year]))
+      File.write!(elixir_file, template)
+      IO.puts("Created elixir file: \e[1;34m#{elixir_file}\e[0m")
     end
+
+    input_file = AOC.Path.get(:puzzle, [year, day, :input])
+
+    if File.exists?(input_file) do
+      AOC.log_warn("Input file already exists, skiping.")
+    else
+      File.mkdir_p!(AOC.Path.get(:puzzle, [year, day]))
+      File.write!(input_file, "")
+      IO.puts("Created input file: \e[1;34m#{input_file}\e[0m")
+    end
+
+    example_file = AOC.Path.get(:puzzle, [year, day, 1])
+
+    if File.exists?(example_file) do
+      AOC.log_warn("Example file already exists, skiping.")
+    else
+      File.write!(example_file, "")
+      IO.puts("Created example file: \e[1;34m#{example_file}\e[0m")
+    end
+  end
+
+  def arg_config do
+    %{
+      "year" => %AOC.ArgConfig{
+        required: true,
+        validation_fn: &AOC.Year.validate(&1),
+        format_fn: &AOC.Year.new!(&1)
+      },
+      "day" => %AOC.ArgConfig{
+        required: true,
+        validation_fn: &AOC.Day.validate(&1),
+        format_fn: &AOC.Day.new!(&1)
+      }
+    }
   end
 end
