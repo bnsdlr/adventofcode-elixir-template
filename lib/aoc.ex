@@ -25,6 +25,15 @@ defmodule AOC do
     end
   end
 
+  def format_micros(micros) do
+    if micros > 1000 do
+      ms = :erlang.float_to_binary(micros / 1000, [{:decimals, 3}, :compact])
+      "#{ms}ms"
+    else
+      "#{micros}µs"
+    end
+  end
+
   # log
   def log_err(msg) do
     IO.puts(:stderr, "\e[31m" <> msg <> "\e[0m")

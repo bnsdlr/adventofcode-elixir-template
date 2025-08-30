@@ -4,7 +4,7 @@ defmodule Mix.Tasks.Aoc.Bench do
 
   ## Options
 
-  - `save`: Will only execute effected solutions, defaults to `none`.
+  - `save`: Will only execute effected solutions, defaults to `missing`.
     - `all`: Save all benchmarks to README.md.
     - `missing`: Save missing benchmarks to README.md.
     - `none`: Save no benchmarks but run all solutions.
@@ -22,11 +22,11 @@ defmodule Mix.Tasks.Aoc.Bench do
 
   Bench all solutions but save none.
 
-    $ mix aoc.bench
+    $ mix aoc.bench --save=none
 
   Bench all solutions and save `missing` benchmarks.
 
-    $ mix aoc.bench --save=missing
+    $ mix aoc.bench
 
   Bench all solutions in specified `year` and save `all` benchmarks.
 
@@ -45,57 +45,122 @@ defmodule Mix.Tasks.Aoc.Bench do
       AOC.Args.parse(args)
       |> AOC.Args.apply_config!(arg_config())
 
-    IO.inspect(save)
-    IO.inspect(year)
-    IO.inspect(day)
-    IO.inspect(times)
-
     [part_one: part_one_times, part_two: part_two_times] = times
+
+    old_benchmarks = extract_benchmarks!()
 
     solutions = AOC.Path.Solution.get!(year, day)
 
-    for {year, day} <- Enum.sort_by(solutions, &"#{elem(&1, 0)}#{elem(&1, 1)}") do
-      solution_file = AOC.Path.get(:solution, [year, day])
-      IO.puts("\e[34mBenching \e[36m#{solution_file}\e[0m")
-      IO.puts("\e[36m-----------------------------\e[0m")
+    solutions =
+      case save do
+        "none" ->
+          solutions
 
-      input_file = AOC.Path.get(:puzzle, [year, day, :input])
+        "all" ->
+          solutions
 
-      if File.exists?(input_file) do
-        input = File.read!(input_file)
+        "missing" ->
+          Enum.filter(solutions, fn sol ->
+            Enum.any?(
+              old_benchmarks,
+              fn b -> b.year != elem(sol, 0) or b.day != elem(sol, 1) end
+            )
+          end)
 
-        case AOC.Mod.get(year, day) do
-          {:ok, mod} ->
-            benches = bench(mod, input, part_one: part_one_times, part_two: part_two_times)
-
-            benches =
-              Enum.reduce(benches, [], fn {part, micros}, acc ->
-                elem(
-                  Keyword.get_and_update(acc, part, fn current ->
-                    if current == nil,
-                      do: {current, [micros]},
-                      else: {current, [micros | current]}
-                  end),
-                  1
-                )
-              end)
-
-            for {part, times} <- benches do
-              length = length(times)
-              avg = Enum.sum(times) / length
-              avg = :erlang.float_to_binary(avg / 1000, [{:decimals, 3}, :compact])
-              IO.puts("#{part}: #{avg}ms (#{length})")
-            end
-
-          {:error, reason} ->
-            AOC.log_err(reason)
-        end
-      else
-        AOC.log_err("Could not locate input file: \e[36m#{input_file}\e[0m")
+        _ ->
+          AOC.log_err!("Unknown save value: #{save}.")
       end
 
-      IO.puts("")
+    new_benchmarks =
+      for {year, day} <- Enum.sort_by(solutions, &"#{elem(&1, 0)}#{elem(&1, 1)}") do
+        solution_file = AOC.Path.get(:solution, [year, day])
+        IO.puts("\e[34mBenching \e[36m#{solution_file}\e[0m")
+        IO.puts("\e[36m-----------------------------\e[0m")
+
+        input_file = AOC.Path.get(:puzzle, [year, day, :input])
+
+        benchmark =
+          if File.exists?(input_file) do
+            input = File.read!(input_file)
+
+            case AOC.Mod.get(year, day) do
+              {:ok, mod} ->
+                benchs = bench(mod, input, part_one: part_one_times, part_two: part_two_times)
+
+                benchs =
+                  Enum.reduce(benchs, [], fn {part, micros}, acc ->
+                    elem(
+                      Keyword.get_and_update(acc, part, fn current ->
+                        if current == nil,
+                          do: {current, [micros]},
+                          else: {current, [micros | current]}
+                      end),
+                      1
+                    )
+                  end)
+
+                benchmarks =
+                  for {part, times} <- benchs do
+                    length = length(times)
+                    avg = Enum.sum(times) / length
+                    IO.puts("\e[2K#{part}: #{AOC.format_micros(avg)} (#{length})")
+                    {part, avg}
+                  end
+
+                {:ok, AOC.BenchTiming.from(year, day, benchmarks)}
+
+              {:error, reason} ->
+                AOC.log_err(reason)
+                {:error, reason}
+            end
+          else
+            reason = "Could not locate input file: \e[36m#{input_file}\e[0m"
+            AOC.log_err(reason)
+            {:error, reason}
+          end
+
+        IO.puts("")
+        benchmark
+      end
+
+    if save != "none" do
+      new_benchmarks = for {:ok, benchs} <- new_benchmarks, do: benchs
+
+      benchmarks = merge_benchmarks(old_benchmarks, new_benchmarks)
+
+      set_benchmark_table!(benchmarks)
     end
+  end
+
+  @doc """
+  Merges `old` and `new` benchmarks.
+
+  Benchmarks in `old` maybe overwritten by benchmarks in `new`.
+  """
+  def merge_benchmarks(old, new)
+
+  def merge_benchmarks(old, []) when is_list(old) do
+    old
+  end
+
+  def merge_benchmarks(old, new) when is_list(old) and is_list(new) do
+    [first | new] = new
+
+    {state, index} =
+      Enum.reduce_while(old, {:cont, 0}, fn b, {_, count} ->
+        if b.year == first.year and b.day == first.day,
+          do: {:halt, {:halt, count}},
+          else: {:cont, {:cont, count + 1}}
+      end)
+
+    old =
+      if state == :halt do
+        List.replace_at(old, index, first)
+      else
+        [first | old]
+      end
+
+    merge_benchmarks(old, new)
   end
 
   def bench(_mod, _input, results, []), do: results
@@ -104,7 +169,7 @@ defmodule Mix.Tasks.Aoc.Bench do
     [{part, times} | parts] = parts
 
     if times > 0 do
-      IO.puts("Benching #{part}: #{times}\e[1A")
+      IO.puts("\e[2KBenching #{part}: #{times}\e[1A")
       {micros, result} = AOC.time(fn -> apply(mod, part, [input]) end, silent: true)
 
       {results, parts} =
@@ -120,6 +185,77 @@ defmodule Mix.Tasks.Aoc.Bench do
       bench(mod, input, results, parts)
     end
   end
+
+  @doc """
+  <!--- benchmarking table --->
+  ## Benchmarks
+
+  | Year | Day | Part 1 | Part 2 |
+  | :---: | :---: | :---: | :---:  |
+  | [2015](https://adventofcode.com/2015) | [Day 5](./lib/bin/Y2015/D05.ex) | `100.0ms` | `-` |
+  <!--- benchmarking table --->
+  """
+  def extract_benchmarks!() do
+    with {:ok, content} <- File.read("README.md"),
+         %{"benchs" => benchs} <- Regex.named_captures(benchmark_table_regex(), content),
+         benchs <- String.trim(benchs) do
+      parse_markdown_table(benchs)
+    else
+      {:error, reason} -> AOC.log_err!(reason)
+      nil -> AOC.log_err!("Couldn't find benchmark table in README.md")
+    end
+  end
+
+  def set_benchmark_table!(rows) when is_list(rows) do
+    benchs = [
+      benchmark_table_mark(),
+      "## Benchmarks",
+      "",
+      "| Year | Day | Part 1 | Part 2 |",
+      "| :---: | :---: | :---: | :---: |"
+    ]
+
+    entries = for row <- rows, do: to_string(row)
+
+    benchmarks =
+      [Enum.join(benchs, "\n"), Enum.join(entries, "\n"), benchmark_table_mark()]
+      |> Enum.join("\n")
+
+    IO.puts(benchmarks)
+
+    case File.read("README.md") do
+      {:ok, content} ->
+        File.write!("README.md", Regex.replace(benchmark_table_regex(), content, benchmarks))
+        IO.puts("\e[32mSaved benchmarks to README.md\e[0m")
+
+      {:error, reason} ->
+        AOC.log_err!(reason)
+    end
+  end
+
+  def parse_markdown_table(table) do
+    rows = String.split(table, "\n")
+
+    if length(rows) > 2 do
+      [_, _ | rows] =
+        Enum.map(rows, fn row ->
+          cols = for col <- String.split(row, "|"), do: String.trim(col)
+          for col <- cols, col != "", do: col
+        end)
+
+      for row <- rows do
+        AOC.BenchTiming.from(row)
+      end
+    else
+      []
+    end
+  end
+
+  def benchmark_table_regex do
+    ~r/<!--- benchmarking table --->\s##.*\s+(?<benchs>[\s\S]*?)<!--- benchmarking table --->/
+  end
+
+  def benchmark_table_mark, do: "<!--- benchmarking table --->"
 
   def bench(mod, input, parts), do: bench(mod, input, [], parts)
 
@@ -140,7 +276,7 @@ defmodule Mix.Tasks.Aoc.Bench do
         format_fn: &AOC.Day.new!(&1)
       },
       "save" => %AOC.ArgConfig{
-        default: "none",
+        default: "missing",
         validation_fn: fn save ->
           if save in ["none", "all", "missing"] do
             :ok

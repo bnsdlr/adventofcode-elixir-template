@@ -1,10 +1,10 @@
-defmodule Mix.Tasks.Aoc.Template do
+defmodule Mix.Tasks.Aoc.Scaffold do
   @moduledoc """
-  Create template files for the advent of code day.
+  Scaffold files needed for solutions.
 
   ## Examples
 
-    $ mix aoc.template --year=2025 --day=2
+    $ mix aoc.scaffold --year=2025 --day=2
     ...
     Created elixir file: lib/bin/Y2025/D02.ex
     Created input file: data/Y2025/D02/input.txt
