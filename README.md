@@ -9,7 +9,6 @@ Inspired from [Advent of Code Rust](https://github.com/fspoettel/advent-of-code-
 
 | Year | Day | Part 1 | Part 2 |
 | :---: | :---: | :---: | :---: |
-| [2025](https://adventofcode.com/2025) | [Day 1](./lib/bin/Y2025/D01.ex) | `5.0µs` | `-` |
 <!--- benchmarking table --->
 
 ## Template Setup
@@ -19,13 +18,11 @@ Inspired from [Advent of Code Rust](https://github.com/fspoettel/advent-of-code-
 3. Use [`mix aoc.scaffold`](https://github.com/bnsdlr/adventofcode-elixir?tab=readme-ov-file#scaffolding) and start coding!!!
 
 > [!IMPORTANT] 
-> Make sure not to use the `Logger` module for logging, some tasks like `aoc.test` suppress IO output, this does not work for the Logger module. At least I don't know how...
+> Make sure not to use the `Logger` module for logging, some tasks like `aoc.test` suppress IO output, this does work for the Logger module, but then the output wont be in the right order...
 
 ## Usage
 
 ### Scaffolding
-
-Creates files needed to start coding your solution.
 
 ```shell
 # example: mix aoc.scaffold --year=2025 --day=1
@@ -37,18 +34,15 @@ mix aoc.scaffold --year=<year> --day=<day>
 # Created example file: puzzles/Y2025/D01/example-1.txt
 ```
 
-To get more examples run `mix help aoc.scaffold`.
-
-This will create the elixir file under `lib/bin/Y<year>/D<day>.ex`, 
-one input file at `puzzles/Y<year>/D<day>/input.txt` where you can put the puzzles input 
-and a example file to test your code before submitting an anwer lokated at `puzzles/Y<year>/D<day>/example-1.txt`.
-
 > [!TIP]
 > You can add more examples by adding an example file with a different number, something like this: `example-2.txt`.
 > You can only use integers, no letters...
 
 > [!TIP]
 > To specify wich example input your test should use you can change the example option in the generated elixir file.
+
+> [!TIP]
+> Read the comments.
 
 ```elixir
 defmodule Bin.Y2025.D01 do
@@ -77,8 +71,6 @@ end
 
 ### Testing
 
-Test specified solutions.
-
 ```shell
 # example: mix aoc.test --year=2025 --day=1
 # booth options will default to "all" (will run all solutions found).
@@ -93,13 +85,9 @@ mix aoc.test --year=<year> --day=<day>
 # Part One succeded in 0.001ms
 ```
 
-To get more examples run `mix help aoc.test`.
+This task will run all tests specified in the `tests/0` function of the solution file.
 
-This task will run all tests specified in the `test/0` function of the solution file.
-
-### Solveing
-
-Solve the specified solution.
+### Solving
 
 ```shell
 # example: mix aoc.solve --year=2025 --day=1
@@ -113,16 +101,9 @@ mix aoc.solve --year=<year> --day=<day>
 # Part Two (0.002ms): 42
 ```
 
-More examples can be found by running `mix help aoc.solve`.
-
-This task will run part one and two, and display results. 
+This task will run part one and two, and display the results. 
 
 ### Benchmarking
-
-Benchmark all specified solutions.
-
-> [!TIP]
-> Run `mix help aoc.bench` to get a short explanation for the arguments.
 
 ```shell
 # example: mix aoc.bench --year=2025 --day=1
@@ -134,3 +115,7 @@ mix aoc.bench --year=2025 --day=1 --save=<none|missing|all>
 # part_one returned nil, skipping.
 # part_two: 0.001ms (5)
 ```
+
+## Tips
+
+Run `mix help aoc.<command>` to find more documentation.
