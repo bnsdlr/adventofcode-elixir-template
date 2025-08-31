@@ -1,4 +1,15 @@
 defmodule AOC.Args do
+  @doc """
+  Parse CLI arguments.
+
+  ## Examples
+
+    iex> AOC.Args.parse(["--year=2025", "--day=1"])
+    %{"year" => "2025", "day" => "1"}
+
+    iex> AOC.Args.parse(["-opt=true"])
+    %{"opt" => "true"}
+  """
   def parse(args) do
     key_val_reg = ~r/^--?(?<key>[a-z0-9-]+)=(?<value>.*)/
 
@@ -97,7 +108,7 @@ defmodule AOC.Args do
     end
 
     if Keyword.has_key?(errors, :required) and not Enum.empty?(errors[:required]) do
-      AOC.log_err!("Missing arguements: #{Enum.join(errors[:required], ", ")}")
+      AOC.log_err!("Missing arguments: #{Enum.join(errors[:required], ", ")}")
     end
 
     if has_invalids, do: exit(:shutdown)

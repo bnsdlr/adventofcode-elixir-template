@@ -9,16 +9,14 @@ Inspired from [Advent of Code Rust](https://github.com/fspoettel/advent-of-code-
 
 | Year | Day | Part 1 | Part 2 |
 | :---: | :---: | :---: | :---: |
-| [2025](https://adventofcode.com/2025) | [Day 3](./lib/bin/Y2025/D03.ex) | `-` | `-` |
-| [2025](https://adventofcode.com/2025) | [Day 2](./lib/bin/Y2025/D02.ex) | `-` | `-` |
-| [2015](https://adventofcode.com/2015) | [Day 1](./lib/bin/Y2015/D01.ex) | `-` | `-` |
-| [2025](https://adventofcode.com/2025) | [Day 1](./lib/bin/Y2025/D01.ex) | `-` | `1.0µs` |
+| [2025](https://adventofcode.com/2025) | [Day 1](./lib/bin/Y2025/D01.ex) | `5.0µs` | `-` |
 <!--- benchmarking table --->
 
 ## Template Setup
 
 1. Use [this link](https://github.com/bnsdlr/adventofcode-elixir/generate) to create your repository.
 2. Clone the repository to your computer.
+3. Use [`mix aoc.scaffold`](https://github.com/bnsdlr/adventofcode-elixir?tab=readme-ov-file#scaffolding) and start coding!!!
 
 > [!IMPORTANT] 
 > Make sure not to use the `Logger` module for logging, some tasks like `aoc.test` suppress IO output, this does not work for the Logger module. At least I don't know how...

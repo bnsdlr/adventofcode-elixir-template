@@ -4,7 +4,7 @@ defmodule AOC.Year do
 
   def is_year(%AOC.Year{year: _}), do: true
 
-  def new(year) do
+  def new(year) when is_binary(year) do
     with :ok <- validate(year),
          {year_int, _} <- Integer.parse(year) do
       {:ok, %__MODULE__{year: year_int}}

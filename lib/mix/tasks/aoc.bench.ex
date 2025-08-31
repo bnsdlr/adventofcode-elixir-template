@@ -123,9 +123,9 @@ defmodule Mix.Tasks.Aoc.Bench do
         benchmark
       end
 
-    if save != "none" do
-      new_benchmarks = for {:ok, benchs} <- new_benchmarks, do: benchs
+    new_benchmarks = for {:ok, benchs} <- new_benchmarks, do: benchs
 
+    if save != "none" and not Enum.empty?(new_benchmarks) do
       benchmarks = merge_benchmarks(old_benchmarks, new_benchmarks)
 
       set_benchmark_table!(benchmarks)
@@ -163,6 +163,8 @@ defmodule Mix.Tasks.Aoc.Bench do
     merge_benchmarks(old, new)
   end
 
+  def bench(mod, input, parts), do: bench(mod, input, [], parts)
+
   def bench(_mod, _input, results, []), do: results
 
   def bench(mod, input, results, parts) when is_list(parts) do
@@ -170,7 +172,7 @@ defmodule Mix.Tasks.Aoc.Bench do
 
     if times > 0 do
       IO.puts("\e[2KBenching #{part}: #{times}\e[1A")
-      {micros, result} = AOC.time(fn -> apply(mod, part, [input]) end, silent: true)
+      {{micros, result}, _} = AOC.time(fn -> apply(mod, part, [input]) end, silent: true)
 
       {results, parts} =
         if result == nil do
@@ -186,15 +188,6 @@ defmodule Mix.Tasks.Aoc.Bench do
     end
   end
 
-  @doc """
-  <!--- benchmarking table --->
-  ## Benchmarks
-
-  | Year | Day | Part 1 | Part 2 |
-  | :---: | :---: | :---: | :---:  |
-  | [2015](https://adventofcode.com/2015) | [Day 5](./lib/bin/Y2015/D05.ex) | `100.0ms` | `-` |
-  <!--- benchmarking table --->
-  """
   def extract_benchmarks!() do
     with {:ok, content} <- File.read("README.md"),
          %{"benchs" => benchs} <- Regex.named_captures(benchmark_table_regex(), content),
@@ -220,8 +213,6 @@ defmodule Mix.Tasks.Aoc.Bench do
     benchmarks =
       [Enum.join(benchs, "\n"), Enum.join(entries, "\n"), benchmark_table_mark()]
       |> Enum.join("\n")
-
-    IO.puts(benchmarks)
 
     case File.read("README.md") do
       {:ok, content} ->
@@ -256,8 +247,6 @@ defmodule Mix.Tasks.Aoc.Bench do
   end
 
   def benchmark_table_mark, do: "<!--- benchmarking table --->"
-
-  def bench(mod, input, parts), do: bench(mod, input, [], parts)
 
   def arg_config do
     %{

@@ -19,7 +19,12 @@ defmodule AOC do
     silent = Keyword.get(opts, :silent, false)
 
     if silent do
-      AOC.Silence.run(fn -> time(task) end)
+      {{micros, result}, io} =
+        ExUnit.CaptureIO.with_io(fn ->
+          time(task)
+        end)
+
+      {{micros, result}, io}
     else
       time(task)
     end

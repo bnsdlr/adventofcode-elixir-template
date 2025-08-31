@@ -1,11 +1,6 @@
 defmodule AOC.Mod do
   def str(year, day), do: "Bin.#{year}.#{day}"
 
-  def atom(year, day) do
-    str(year, day)
-    |> String.to_existing_atom()
-  end
-
   @doc """
   Get the module for the given `year` and `day` string, and make sure its loaded.
   """

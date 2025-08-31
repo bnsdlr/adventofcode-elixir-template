@@ -4,6 +4,9 @@ defmodule Mix.Tasks.Aoc.Test do
 
   - `--year`: defaults to `all`
   - `--day`: defaults to `all`
+  - `--silent`: defaults to `success`
+    - `success`: don't show IO on success, only on error.
+    - `always`: never show IO.
 
   ## Examples
 
@@ -24,7 +27,7 @@ defmodule Mix.Tasks.Aoc.Test do
 
   @impl Mix.Task
   def run(args) do
-    %{"year" => year, "day" => day} =
+    %{"year" => year, "day" => day, "silent" => silent} =
       AOC.Args.parse(args)
       |> AOC.Args.apply_config!(arg_config())
 
@@ -44,12 +47,16 @@ defmodule Mix.Tasks.Aoc.Test do
             example_file = AOC.Path.get(:puzzle, [year, day, example])
             example_input = File.read!(example_file)
 
-            {micros, res} =
+            {{micros, res}, io} =
               AOC.time(fn -> apply(mod, part, [example_input]) end, silent: true)
 
             if res == result do
               IO.puts("\e[32mPart One succeded in \e[3;35m#{micros / 1000}ms\e[0m")
             else
+              if silent == "success" do
+                IO.puts("Captured output:\n#{io}")
+              end
+
               AOC.log_err("Part One failed, expected #{inspect(result)} got #{inspect(res)}")
             end
           end
@@ -77,6 +84,14 @@ defmodule Mix.Tasks.Aoc.Test do
           if day != "all", do: AOC.Day.validate(day), else: :ok
         end,
         format_fn: &AOC.Day.new!(&1)
+      },
+      "silent" => %AOC.ArgConfig{
+        default: "success",
+        validation_fn: fn silent ->
+          if silent in ["success", "always"],
+            do: :ok,
+            else: {:error, "silent options has to be one of: success, always"}
+        end
       }
     }
   end
