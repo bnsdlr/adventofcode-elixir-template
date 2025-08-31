@@ -4,6 +4,15 @@ Solutions for [Advent of Code](https://adventofcode.com/) in [Elixir](https://el
 
 Inspired from [Advent of Code Rust](https://github.com/fspoettel/advent-of-code-rust).
 
+> [!IMPORTANT]
+> [DON'T make the advent of code puzzle inputs public](https://adventofcode.com/2024/about#:~:text=Can%20I%20copy,it%20something%20similar.). Do one of the following:
+> 1. Make your repository private.
+> 2. Or add those lines to your `.gitignore` file:
+> ```shell
+> input.txt
+> example-*.txt
+> ```
+
 <!--- benchmarking table --->
 ## Benchmarks
 
@@ -32,6 +41,7 @@ mix aoc.scaffold --year=<year> --day=<day>
 # Created elixir file: lib/bin/Y2025/D01.ex
 # Created input file: puzzles/Y2025/D01/input.txt
 # Created example file: puzzles/Y2025/D01/example-1.txt
+# Created .keep file: data/Y2025/D01/.keep
 ```
 
 > [!TIP]

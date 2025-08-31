@@ -4,11 +4,12 @@ defmodule Mix.Tasks.Aoc.Scaffold do
 
   ## Examples
 
-    $ mix aoc.scaffold --year=2025 --day=2
+    $ mix aoc.scaffold --year=2025 --day=1
     ...
-    Created elixir file: lib/bin/Y2025/D02.ex
-    Created input file: data/Y2025/D02/input.txt
-    Created example file: data/Y2025/D02/example-1.txt
+    Created elixir file: lib/bin/Y2025/D01.ex
+    Created input file: data/Y2025/D01/input.txt
+    Created example file: data/Y2025/D01/example-1.txt
+    Created .keep file: data/Y2025/D01/.keep
   """
 
   use Mix.Task
@@ -51,6 +52,15 @@ defmodule Mix.Tasks.Aoc.Scaffold do
     else
       File.write!(example_file, "")
       IO.puts("Created example file: \e[1;34m#{example_file}\e[0m")
+    end
+
+    keep_file = AOC.Path.get(:puzzle, [year, day, :keep])
+
+    if File.exists?(keep_file) do
+      AOC.log_warn(".keep file already exists, skiping.")
+    else
+      File.write!(keep_file, "")
+      IO.puts("Created .keep file: \e[1;34m#{keep_file}\e[0m")
     end
   end
 
