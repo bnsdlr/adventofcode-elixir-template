@@ -1,118 +1,154 @@
 defmodule AOC.Args do
-	@doc """
-	Parse CLI arguments.
+  @doc """
+   Parse CLI arguments.
 
-	## Examples
+  ## Examples
 
-		iex> AOC.Args.parse(["--year=2025", "--day=1"])
-		%{"year" => "2025", "day" => "1"}
+  	iex> AOC.Args.parse(["--year=2025", "--day=1"])
+  	{%{"year" => "2025", "day" => "1"}, []}
 
-		iex> AOC.Args.parse(["-opt=true"])
-		%{"opt" => "true"}
-	"""
-	def parse(args) do
-		key_val_reg = ~r/^--?(?<key>[a-z0-9-]+)=(?<value>.*)/
+  	iex> AOC.Args.parse(["-opt=true"])
+  	{%{"opt" => "true"}, []}
 
-		Enum.reduce(args, %{}, fn arg, acc ->
-			if not String.match?(arg, key_val_reg) do
-				AOC.log_err!("Argument doesn't match key value pattern (--<key>=<value>).")
-				acc
-			else
-				%{"key" => key, "value" => value} =
-					Regex.named_captures(
-						~r/^--?(?<key>[a-z0-9-]+)=(?<value>.*)/,
-						arg
-					)
+    iex> AOC.Args.parse(["--opt", "2025"])
+    {%{"opt" => "true"}, ["2025"]}
+  """
+  def parse(args) do
+    key_reg = ~r/^--?(?<key>[a-z0-9-]+)$/
+    key_val_reg = ~r/^--?(?<key>[a-z0-9-]+)=(?<value>.*)$/
 
-				Map.put(acc, key, value)
-			end
-		end)
-	end
+    Enum.reduce(args, {%{}, []}, fn arg, {map, no_keys} ->
+      cond do
+        String.match?(arg, key_reg) ->
+          %{"key" => key} = Regex.named_captures(key_reg, arg)
+          {Map.put(map, key, "true"), no_keys}
 
-	@doc """
-	Applies the given `config` to the `args`.
+        String.match?(arg, key_val_reg) ->
+          %{"key" => key, "value" => value} =
+            Regex.named_captures(
+              ~r/^--?(?<key>[a-z0-9-]+)=(?<value>.*)/,
+              arg
+            )
 
-	 - `args`: %{"<key>" => "<value>"}
-	 - `config`: `AOC.ArgConfig`
+          {Map.put(map, key, value), no_keys}
 
-	## Examples
+        true ->
+          {map, [arg | no_keys]}
+      end
+    end)
+  end
 
-		iex> AOC.Args.apply_config(%{}, %{"year" => %AOC.ArgConfig{default: "2025"}})
-		{%{"year" => "2025"}, []}
+  @doc """
+  Applies the given `config` to the `args`.
 
-		iex> AOC.Args.apply_config(%{}, %{"year" => %AOC.ArgConfig{required: true}})
-		{%{}, [required: ["year"]]}
+   - `args`: {%{"<key>" => "<value>"}, [<no_key_value>, ...]}
+   - `config`: `AOC.ArgConfig`
 
-		iex> AOC.Args.apply_config(%{"year" => "2025"}, %{"year" => %AOC.ArgConfig{ 
-		...>	 validation_fn: fn year -> String.length(year) == 4 end
-		...> }})
-		{%{"year" => "2025"}, []}
+  ## Examples
 
-		iex> AOC.Args.apply_config(%{"year" => "0"}, %{"year" => %AOC.ArgConfig{ 
-		...>	 validation_fn: fn year -> 
-		...>		 if String.length(year) == 4 do
-		...>				:ok
-		...>		 else
-		...>			 {:error, "string to short"}
-		...>		 end
-		...> end}})
-		{%{}, [invalid: [{"year", "string to short"}]]}
+  	iex> AOC.Args.apply_config({%{}, []}, %{"year" => %AOC.ArgConfig{mode: {:default, "2025"}}})
+  	{%{"year" => "2025"}, [], []}
 
-	"""
-	def apply_config(args, config) do
-		Enum.reduce(config, {%{}, []}, fn {arg, conf}, {nargs, errors} ->
-			cond do
-				not Map.has_key?(args, arg) ->
-					if conf.default != nil do
-						{Map.put(nargs, arg, conf.default), errors}
-					else
-						{nargs, Keyword.update(errors, :required, [arg], fn val -> [arg | val] end)}
-					end
+  	iex> AOC.Args.apply_config({%{}, []}, %{"year" => %AOC.ArgConfig{mode: :required}})
+  	{%{}, [required: ["year"]], []}
 
-				true ->
-					with true <- conf.validation_fn != nil,
-							 :ok <- conf.validation_fn.(args[arg]) do
-						value =
-							if conf.format_fn != nil do
-								conf.format_fn.(args[arg])
-							else
-								args[arg]
-							end
+  	iex> AOC.Args.apply_config({%{"year" => "2025"}, []}, %{"year" => %AOC.ArgConfig{ 
+  	...>	 validation_fn: fn year -> String.length(year) == 4 end
+  	...> }})
+  	{%{"year" => "2025"}, [], []}
 
-						{Map.put(nargs, arg, value), errors}
-					else
-						{:error, reason} ->
-							error = {arg, reason}
-							{nargs, Keyword.update(errors, :invalid, [error], fn val -> [error | val] end)}
+  	iex> AOC.Args.apply_config({%{"year" => "0"}, []}, %{"year" => %AOC.ArgConfig{ 
+  	...>	 validation_fn: fn year -> 
+  	...>		 if String.length(year) == 4 do
+  	...>				:ok
+  	...>		 else
+  	...>			 {:error, "string to short"}
+  	...>		 end
+  	...> end}})
+  	{%{}, [invalid: [{"year", "string to short"}]], []}
 
-						_ ->
-							{Map.put(nargs, arg, args[arg]), errors}
-					end
-			end
-		end)
-	end
+    iex> AOC.Args.apply_config({%{}, ["2025"]}, %{"year" => %AOC.ArgConfig{
+    ...>   mode: :required,
+    ...>   validation_fn: &AOC.Year.validate(&1),
+    ...> }})
+    {%{"year" => "2025"}, [], []}
+  """
+  def apply_config({args, no_keys}, config) do
+    Enum.reduce(config, {%{}, [], no_keys}, fn {arg, conf}, {nargs, errors, no_keys} ->
+      if Map.has_key?(args, arg) do
+        with true <- conf.validation_fn != nil,
+             :ok <- conf.validation_fn.(args[arg]) do
+          {Map.put(nargs, arg, conf.format_fn.(args[arg])), errors, no_keys}
+        else
+          {:error, reason} ->
+            error = {arg, reason}
 
-	@doc """
-	Same as `AOC.Args.apply_config/2` but may raise an error, 
-	instead of returning it.
-	"""
-	def apply_config!(args, config) do
-		{args, errors} = apply_config(args, config)
+            {nargs, Keyword.update(errors, :invalid, [error], fn val -> [error | val] end),
+             no_keys}
 
-		has_invalids = Keyword.has_key?(errors, :invalid)
+          _ ->
+            {Map.put(nargs, arg, args[arg]), errors, no_keys}
+        end
+      else
+        matching =
+          Enum.filter(no_keys, fn val ->
+            if conf.value_fn? != nil,
+              do: conf.value_fn?.(val),
+              else: conf.validation_fn && conf.validation_fn.(val) == :ok
+          end)
 
-		if has_invalids do
-			for {arg, reason} <- errors[:invalid] do
-				AOC.log_err("Arg invalid (#{arg}): " <> reason)
-			end
-		end
+        case conf.mode do
+          :required ->
+            case matching do
+              [value | _] ->
+                {Map.put(nargs, arg, conf.format_fn.(value)), errors, no_keys -- [value]}
 
-		if Keyword.has_key?(errors, :required) and not Enum.empty?(errors[:required]) do
-			AOC.log_err!("Missing arguments: #{Enum.join(errors[:required], ", ")}")
-		end
+              _ ->
+                {nargs, Keyword.update(errors, :required, [arg], fn old -> [arg | old] end),
+                 no_keys}
+            end
 
-		if has_invalids, do: exit(:shutdown)
+          {:default, default_value} ->
+            case matching do
+              [value | _] ->
+                {Map.put(nargs, arg, conf.format_fn.(value)), errors, no_keys -- [value]}
 
-		args
-	end
+              _ ->
+                {Map.put(nargs, arg, default_value), errors, no_keys}
+            end
+
+          :optional ->
+            {nargs, errors, no_keys}
+        end
+      end
+    end)
+  end
+
+  @doc """
+  Same as `AOC.Args.apply_config/2` but may raise an error, 
+  instead of returning it.
+  """
+  def apply_config!({args, no_keys}, config) do
+    {args, errors, no_keys} = apply_config({args, no_keys}, config)
+
+    has_invalids = Keyword.has_key?(errors, :invalid)
+
+    if has_invalids do
+      for {arg, reason} <- errors[:invalid] do
+        AOC.log_err("Arg invalid (#{arg}): " <> reason)
+      end
+    end
+
+    if Keyword.has_key?(errors, :required) and not Enum.empty?(errors[:required]) do
+      AOC.log_err!("Missing arguments: #{Enum.join(errors[:required], ", ")}")
+    end
+
+    if not Enum.empty?(no_keys) do
+      AOC.log_err!("Invalid option: #{Enum.join(no_keys, ", ")}")
+    end
+
+    if has_invalids, do: exit(:shutdown)
+
+    {args, no_keys}
+  end
 end

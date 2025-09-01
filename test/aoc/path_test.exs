@@ -1,4 +1,4 @@
 defmodule AOC.PathTest do
-	use ExUnit.Case, async: true
-	doctest AOC.Path
+  use ExUnit.Case, async: true
+  doctest AOC.Path
 end

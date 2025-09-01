@@ -18,6 +18,8 @@ Inspired from [Advent of Code Rust](https://github.com/fspoettel/advent-of-code-
 
 | Year | Day | Part 1 | Part 2 |
 | :---: | :---: | :---: | :---: |
+| [2025](https://adventofcode.com/2025) | [Day 2](./lib/bin/Y2025/D02.ex) | `-` | `1.4µs` |
+| [2025](https://adventofcode.com/2025) | [Day 1](./lib/bin/Y2025/D01.ex) | `0.6µs` | `0.8µs` |
 <!--- benchmarking table --->
 
 ## Template Setup

@@ -11,7 +11,7 @@ defmodule AOC.MixProject do
       env: [
         elixir_template_file: "data/templates/elixir.ex.temp",
         solutions_dir: "lib/bin",
-        puzzle_input_dir: "data",
+        puzzle_input_dir: "data"
       ]
     ]
   end
