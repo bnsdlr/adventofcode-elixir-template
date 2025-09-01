@@ -56,26 +56,26 @@ mix aoc.scaffold --year=<year> --day=<day>
 
 ```elixir
 defmodule Bin.Y2025.D01 do
-  def part_one(_input) do
-    # Code for part one
-    nil
-  end
+	def part_one(_input) do
+		# Code for part one
+		nil
+	end
 
-  def part_two(_input) do
-    # Code for part two
-    nil
-  end
+	def part_two(_input) do
+		# Code for part two
+		nil
+	end
 
-  def tests do
-    [
-      # - `part`: Is the atom of the function that will be called from the test.
-      # - `result`: Is the expected result returned from the function.
-      # - `example`: Specifies which example file to use (../example-<example>.txt).
-      [part: :part_one, result: nil, example: 1],
-      [part: :part_two, result: nil, example: 1],
-      # Feel free to add more tests here.
-    ]
-  end
+	def tests do
+		[
+			# - `part`: Is the atom of the function that will be called from the test.
+			# - `result`: Is the expected result returned from the function.
+			# - `example`: Specifies which example file to use (../example-<example>.txt).
+			[part: :part_one, result: nil, example: 1],
+			[part: :part_two, result: nil, example: 1],
+			# Feel free to add more tests here.
+		]
+	end
 end
 ```
 
@@ -107,7 +107,7 @@ mix aoc.solve --year=<year> --day=<day>
 # Solve part one.
 # Solve part two.
 # -------------
-# Part One (0.002ms): ✖     # function returned nil
+# Part One (0.002ms): ✖		 # function returned nil
 # Part Two (0.002ms): 42
 ```
 
