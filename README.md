@@ -18,13 +18,11 @@ Inspired from [Advent of Code Rust](https://github.com/fspoettel/advent-of-code-
 
 | Year | Day | Part 1 | Part 2 |
 | :---: | :---: | :---: | :---: |
-| [2025](https://adventofcode.com/2025) | [Day 2](./lib/bin/Y2025/D02.ex) | `-` | `1.4µs` |
-| [2025](https://adventofcode.com/2025) | [Day 1](./lib/bin/Y2025/D01.ex) | `0.6µs` | `0.8µs` |
 <!--- benchmarking table --->
 
 ## Template Setup
 
-1. Use [this link](https://github.com/bnsdlr/adventofcode-elixir/generate) to create your repository.
+1. Use [this link](https://github.com/bnsdlr/adventofcode-elixir-template/generate) to create your repository.
 2. Clone the repository to your computer.
 3. Use [`mix aoc.scaffold`](https://github.com/bnsdlr/adventofcode-elixir?tab=readme-ov-file#scaffolding) and start coding!!!
 
@@ -33,10 +31,24 @@ Inspired from [Advent of Code Rust](https://github.com/fspoettel/advent-of-code-
 
 ## Usage
 
+### Arguments
+
+You can pass arguments in three different ways.
+
+1. As key value pair: `--<key>=<value>`
+2. As key only, will set the value to `true`: `--<key>`
+3. As value only, this will try to match values to a key: `<value>`
+
+    E.g. if you pass `2025` will know it is a `year` because it has 4 digits and is in range from `2000` to `2099`.
+    Days can also be recognized because they are 1 or 2 digits and are in range from `1` to `25`.
+
+> [!TIP]
+> You can get more information about `arguments` and more examples by running: `mix help aoc.<command>`.
+
 ### Scaffolding
 
 ```shell
-# example: mix aoc.scaffold --year=2025 --day=1
+# example: mix aoc.scaffold 2025 1
 mix aoc.scaffold --year=<year> --day=<day>
 
 # output:
@@ -53,8 +65,7 @@ mix aoc.scaffold --year=<year> --day=<day>
 > [!TIP]
 > To specify wich example input your test should use you can change the example option in the generated elixir file.
 
-> [!TIP]
-> Read the comments.
+Read the comments.
 
 ```elixir
 defmodule Bin.Y2025.D01 do
@@ -84,8 +95,7 @@ end
 ### Testing
 
 ```shell
-# example: mix aoc.test --year=2025 --day=1
-# booth options will default to "all" (will run all solutions found).
+# example: mix aoc.test 2025 1
 mix aoc.test --year=<year> --day=<day>
 
 # output:
@@ -102,7 +112,7 @@ This task will run all tests specified in the `tests/0` function of the solution
 ### Solving
 
 ```shell
-# example: mix aoc.solve --year=2025 --day=1
+# example: mix aoc.solve 2025 1
 mix aoc.solve --year=<year> --day=<day>
 
 # output:
@@ -118,8 +128,8 @@ This task will run part one and two, and display the results.
 ### Benchmarking
 
 ```shell
-# example: mix aoc.bench --year=2025 --day=1
-mix aoc.bench --year=2025 --day=1 --save=<none|missing|all>
+# example: mix aoc.bench 2025 1
+mix aoc.bench --year=2025 --day=1
 
 # output:
 # Benching lib/bin/Y2025/D01.ex
@@ -127,7 +137,3 @@ mix aoc.bench --year=2025 --day=1 --save=<none|missing|all>
 # part_one returned nil, skipping.
 # part_two: 0.001ms (5)
 ```
-
-## Tips
-
-Run `mix help aoc.<command>` to find more documentation.
